@@ -125,6 +125,156 @@ plt.text(1, counts_frame["counts"][1]//2,
          counts_frame["percentage"][1], ha = "center", color = "white")
 plt.title("Survived frequencies")
 
+# Column 3: Pclass
+train_ds["Pclass"].head()
+train_ds["Pclass"].unique()
+sum(train_ds["Pclass"].isnull())
+
+counts = train_ds["Pclass"].value_counts()
+classes = counts.index
+percentage = list(map(lambda x : str(x) + "%", round(100*counts/sum(counts), 2).values))
+# counts_frame = pd.DataFrame({"survived" : survived, "counts" : counts.values, 
+#                              "percentage" : percentage})
+
+counts_frame = pd.DataFrame({"class" : list(map(lambda x : str(x), classes)), 
+                             "counts" : counts.values, "percentage" : percentage})
+
+
+plt.bar(counts_frame["class"], counts_frame["counts"], color = "teal")
+plt.text(0, counts_frame["counts"][0]//2, 
+         counts_frame["percentage"][0], ha = "center", color = "white")
+plt.text(1, counts_frame["counts"][1]//2, 
+         counts_frame["percentage"][1], ha = "center", color = "white")
+plt.text(2, counts_frame["counts"][2]//2, 
+         counts_frame["percentage"][2], ha = "center", color = "white")
+plt.title("Class frequencies")
+
+# Percentage of survived for each class
+train_ds[train_ds["Pclass"] == 3]["Survived"].value_counts()
+train_ds[train_ds["Pclass"] == 1]["Survived"].value_counts()
+train_ds[train_ds["Pclass"] == 2]["Survived"].value_counts()
+
+# counts_frame["not_survived"] = pd.Series(np.array([0]*3))
+# counts_frame["survived"] = pd.Series(np.array([0]*3))
+counts_frame.loc[0, ["not_survived", "survived"]] = train_ds[train_ds["Pclass"] == 3]["Survived"].value_counts().values
+counts_frame.loc[1, ["not_survived", "survived"]] = train_ds[train_ds["Pclass"] == 1]["Survived"].value_counts().values
+counts_frame.loc[2, ["not_survived", "survived"]] = train_ds[train_ds["Pclass"] == 2]["Survived"].value_counts().values
+
+test = [372, 119]
+test = np.array(test)
+test = (100*test/sum(test)).round(2)
+f = lambda x : list(map(str, x))
+ff = lambda x : list(map(lambda y : y + "%", x))
+ff(f(test))
+
+(counts_frame.loc[0, ["not_survived", "survived"]]/sum(counts_frame.loc[0, ["not_survived", "survived"]])).values
+test = (counts_frame.loc[0, ["not_survived", "survived"]]/sum(counts_frame.loc[0, ["not_survived", "survived"]])).values
+for i in range(0, len(test)):
+    print(i)
+
+# How to add new columns to an existing dataframe...
+counts_frame.assign(new = np.random.rand(3))
+
+new_columns = []
+for i in range(0, 3):
+    aux = (counts_frame.loc[i, ["not_survived", "survived"]]/sum(counts_frame.loc[i, ["not_survived", "survived"]])).values
+    aux = np.array(list(100*aux)).round(2)
+    aux = ff(f(aux))
+    new_columns.append(aux)
+
+
+counts_frame = counts_frame.assign(percentage_not = [""]*3, percentage_yes = [""]*3)
+for i in range(0, 3):
+    aux = (counts_frame.loc[i, ["not_survived", "survived"]]/sum(counts_frame.loc[i, ["not_survived", "survived"]])).values
+    aux = np.array(list(100*aux)).round(2)
+    aux = ff(f(aux))
+    counts_frame.loc[i, ["percentage_not", "percentage_yes"]] = aux
+
+
+plt.bar(["0", "1"], counts_frame[counts_frame["class"] == "3"][["not_survived", "survived"]], color = "teal")
+# This does not work, so let's try with "subframes"
+#
+# First test...
+test = counts_frame[counts_frame["class"] == "3"][["not_survived", "survived"]]
+subframe = pd.DataFrame({"survived" : ["0", "1"], "counts" : test.values[0]})
+plt.bar(subframe["survived"], subframe["counts"])
+
+# Now with a loop...
+for i in counts_frame["class"]:
+    counts = counts_frame[counts_frame["class"] == i][["not_survived", "survived"]]
+    subframe = pd.DataFrame({"survived" : ["0", "1"], "counts" : counts.values[0]})
+    plt.bar(subframe["survived"], subframe["counts"])
+
+# Let's try to make the plots separated
+# Class 3
+counts = counts_frame[counts_frame["class"] == "3"][["not_survived", "survived"]]
+percentages = counts_frame[counts_frame["class"] == "3"][["percentage_not", "percentage_yes"]]
+subframe = pd.DataFrame({"survived" : ["0", "1"], "counts" : counts.values[0], "percentage" : percentages.values[0]})
+plt.bar(subframe["survived"], subframe["counts"], color = "darkslategray")
+plt.text(0, subframe["counts"][0]//2, 
+         subframe["percentage"][0], ha = "center", color = "white")
+plt.text(1, subframe["counts"][1]//2, 
+         subframe["percentage"][1], ha = "center", color = "white")
+plt.title("Survived  class 3")
+# Class 2
+counts = counts_frame[counts_frame["class"] == "2"][["not_survived", "survived"]]
+percentages = counts_frame[counts_frame["class"] == "2"][["percentage_not", "percentage_yes"]]
+subframe = pd.DataFrame({"survived" : ["0", "1"], "counts" : counts.values[0], "percentage" : percentages.values[0]})
+plt.bar(subframe["survived"], subframe["counts"], color = "teal")
+plt.text(0, subframe["counts"][0]//2, 
+         subframe["percentage"][0], ha = "center", color = "white")
+plt.text(1, subframe["counts"][1]//2, 
+         subframe["percentage"][1], ha = "center", color = "white")
+plt.title("Survived  class 2")
+# Class 1
+counts = counts_frame[counts_frame["class"] == "1"][["not_survived", "survived"]]
+percentages = counts_frame[counts_frame["class"] == "1"][["percentage_not", "percentage_yes"]]
+subframe = pd.DataFrame({"survived" : ["0", "1"], "counts" : counts.values[0], "percentage" : percentages.values[0]})
+plt.bar(subframe["survived"], subframe["counts"], color = "darkturquoise")
+plt.text(0, subframe["counts"][0]//2, 
+         subframe["percentage"][0], ha = "center", color = "white")
+plt.text(1, subframe["counts"][1]//2, 
+         subframe["percentage"][1], ha = "center", color = "white")
+plt.title("Survived  class 1")
+
+# Grouped plots
+classes = [3]*2
+classes.extend([1]*2)
+classes.extend([2]*2)
+survived = list(counts_frame[counts_frame["class"] == "3"][["not_survived", "survived"]].values[0])
+percentage = list(counts_frame[counts_frame["class"] == "3"][["percentage_not", "percentage_yes"]].values[0])
+for i in ["1", "2"]:
+    survived.extend(list(counts_frame[counts_frame["class"] == i][["not_survived", "survived"]].values[0]))
+    percentage.extend(list(counts_frame[counts_frame["class"] == i][["percentage_not", "percentage_yes"]].values[0]))
+
+
+
+counts_frame_long = pd.DataFrame({"class" : classes, "survived" : [0, 1]*3, 
+                                  "counts" : survived, "percentage" : percentage})
+
+
+counts_frame[["class", "not_survived", "survived"]].pivot_table(index = "class").plot.barh(title = "Survived for each class", xlabel = "counts", color = ["darkslategray", "darkcyan"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
