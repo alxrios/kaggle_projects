@@ -256,6 +256,77 @@ counts_frame_long = pd.DataFrame({"class" : classes, "survived" : [0, 1]*3,
 counts_frame[["class", "not_survived", "survived"]].pivot_table(index = "class").plot.barh(title = "Survived for each class", xlabel = "counts", color = ["darkslategray", "darkcyan"])
 
 
+# Column 4: Name
+
+train_ds["Name"].head()
+len(train_ds["Name"].unique())
+# The variable contains the names of the passengers.
+# No name is repeated.
+# How many repeated surnames in the variable?
+surnames = []
+for i in range(0, train_ds.shape[0]):
+    surnames.append(train_ds["Name"][i].split()[0].split(',')[0])
+
+surnames = pd.Series(surnames)
+len(surnames.unique())
+# Only 661 surnames are unique, so some of them are repeated.
+# Let's create a dataframe with three columns, one with the passenger id, other
+# with the passenger surname.
+repeated_df = pd.DataFrame({"PassengerId" : train_ds["PassengerId"], "surname" : surnames})
+
+repeated = []
+for i in repeated_df["surname"]:
+    repeated.append(list(repeated_df[repeated_df["surname"] == i].index.values))
+
+
+repeated_df = repeated_df.assign(repeated = repeated)
+len_rep = []
+more_than_one = []
+for i in range(0, repeated_df.shape[0]):
+    more_than_one.append(len(repeated_df["repeated"][i]) > 1)
+    len_rep.append(len(repeated_df["repeated"][i]))
+
+repeated_df = repeated_df.assign(len_rep = len_rep, more_than_one = more_than_one)
+
+# Let's inspect the first repeated surnames
+train_ds.loc[repeated_df["repeated"][0]][["Name", "Pclass"]]
+# It seems that in this case the passengers are brothers or maye father and son.
+train_ds.loc[repeated_df["repeated"][0]][["Name", "Pclass", "Age"]]
+# Inspecting also their ages, we can reject the father and son hypothesis.
+# Let's test another
+train_ds.loc[repeated_df["repeated"][3]][["Name", "Pclass", "Age"]]
+# Here the case is clearly of a married couple.
+# Let's inspect the surname with more appearances
+np.sort(repeated_df["len_rep"].unique())
+# The surname with more appearaces has up to nine.
+repeated_df[repeated_df["len_rep"] == 9]["surname"]
+train_ds.iloc[repeated_df.loc[13]["repeated"]][["Name", "Pclass", "Age"]]
+# We could thought that all are members of a same family, maybe husband, wife, 
+# their children and a husband's brother.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
