@@ -270,7 +270,7 @@ for i in range(0, train_ds.shape[0]):
 surnames = pd.Series(surnames)
 len(surnames.unique())
 # Only 661 surnames are unique, so some of them are repeated.
-# Let's create a dataframe with three columns, one with the passenger id, other
+# Let's create a dataframe with two columns, one with the passenger id and other
 # with the passenger surname.
 repeated_df = pd.DataFrame({"PassengerId" : train_ds["PassengerId"], "surname" : surnames})
 
@@ -304,44 +304,198 @@ train_ds.iloc[repeated_df.loc[13]["repeated"]][["Name", "Pclass", "Age"]]
 # We could thought that all are members of a same family, maybe husband, wife, 
 # their children and a husband's brother.
 
+# Column 5: Sex
+
+train_ds["Sex"].head()
+len(train_ds["Sex"].unique())
+sum(train_ds["Sex"].isnull())
+
+train_ds["Sex"].value_counts()
+train_ds["Sex"].value_counts().plot.bar()
+percentages = train_ds["Sex"].value_counts()/sum(train_ds["Sex"].value_counts())
+percentages = round(100*percentages, 2)
+percentages = list(map(lambda x : str(x) + "%", percentages))
+
+counts = train_ds["Sex"].value_counts()
+plt.bar(counts.index, counts.values, color = "powderblue")
+plt.text(0, counts[0]//2, 
+         percentages[0], ha = "center", color = "black")
+plt.text(1, counts[1]//2, 
+         percentages[1], ha = "center", color = "black")
+plt.title("Passengers by sex")
+# There were almost twice as many men as women among the passengers.
+#
+# Now let's check the quantity of survivors for both sexes.
+# After that, let's see the same for each of the classes.
+survived = [train_ds[train_ds["Sex"] == "male"]["Survived"].value_counts()[1]]
+survived.extend([train_ds[train_ds["Sex"] == "female"]["Survived"].value_counts()[0]])
+not_survived = [train_ds[train_ds["Sex"] == "male"]["Survived"].value_counts()[0]]
+not_survived.extend([train_ds[train_ds["Sex"] == "female"]["Survived"].value_counts()[1]])
+# Create a grouped barplot with this data.
+counts_frame = pd.DataFrame({"sex" : ["male", "female"], "survived" : survived, 
+                             "not_survived" : not_survived})
+
+counts_frame.pivot_table(index = "sex").plot.barh(color = ["darkolivegreen", "greenyellow"], xlabel = "counts", title = "Survivors for each sex")
+# Note: add percentages to this dataframe
+percentage_yes = [round(100*counts_frame["survived"][0]/sum(counts_frame.loc[0][["survived", "not_survived"]]), 2)]
+percentage_yes.extend([round(100*counts_frame["survived"][1]/sum(counts_frame.loc[1][["survived", "not_survived"]]), 2)])
+percentage_no = [round(100*counts_frame["not_survived"][0]/sum(counts_frame.loc[0][["survived", "not_survived"]]), 2)]
+percentage_no.extend([round(100*counts_frame["not_survived"][1]/sum(counts_frame.loc[1][["survived", "not_survived"]]), 2)])
+percentage_yes = list(map(lambda x : str(x) + "%", percentage_yes))
+percentage_no = list(map(lambda x : str(x) + "%", percentage_no))
+counts_frame = counts_frame.assign(percentage_yes = percentage_yes)
+counts_frame = counts_frame.assign(percentage_no = percentage_no)
+
+# Let's observe the survivors by sex and class.
+
+classes = []
+for i in range(1, 4):
+    classes.extend([i]*4)
+    
+    
+
+# rows = (train_ds["Pclass"] == 1) and (train_ds["Sex"] == "male")
+# survived = train_ds[([train_ds["Pclass"] == 1] and [train_ds["Sex"] == "male"])[0]][["Survived", "Sex", "Pclass"]]
+# survived = train_ds[([train_ds["Pclass"] == 1] and [train_ds["Sex"] == "male"])[0]][["Survived", "Sex", "Pclass"]]
+sex = ["male"]*2
+sex.extend(["female"]*2)
+cs_frame = pd.DataFrame({"class" : classes, "sex" : sex*3, "survived" : [0, 1]*6})
+# Note: when the dataframe is completed, add a column with values male1, female1, 
+# male2, female2 ... It will substitute the values of the column sex in the 
+# previous dataframe.
+
+# Male, class 1
+condition1 = train_ds["Pclass"] == 1
+condition2 = train_ds["Sex"] == "male"
+condition1 = [condition1]
+condition2 = [condition2]
+# test1 = (condition1 and condition2)[0]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts = list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().values)
+
+# Female, class 1
+condition1 = train_ds["Pclass"] == 1
+condition2 = train_ds["Sex"] == "female"
+condition1 = [condition1]
+condition2 = [condition2]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts.extend(list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().sort_values().values))
+
+# Male, class 2
+condition1 = train_ds["Pclass"] == 2
+condition2 = train_ds["Sex"] == "male"
+condition1 = [condition1]
+condition2 = [condition2]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts.extend(list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().values))
+
+# Female, class 2
+condition1 = train_ds["Pclass"] == 2
+condition2 = train_ds["Sex"] == "female"
+condition1 = [condition1]
+condition2 = [condition2]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts.extend(list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().sort_values().values))
+
+# Male, class 3
+condition1 = train_ds["Pclass"] == 3
+condition2 = train_ds["Sex"] == "male"
+condition1 = [condition1]
+condition2 = [condition2]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts.extend(list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().values))
+
+# Female, class 3
+condition1 = train_ds["Pclass"] == 3
+condition2 = train_ds["Sex"] == "female"
+condition1 = [condition1]
+condition2 = [condition2]
+selection = []
+for i in range(0, len(condition1[0])):
+    selection.append(condition1[0][i] and condition2[0][i])
+    
+
+counts.extend(list(train_ds.loc[selection][["Sex", "Pclass", "Survived"]].value_counts().values))
+
+cs_frame = cs_frame.assign(counts = counts)
+
+# Adding a new column that sintetizes the information about the sex and the class
+sexclass = []
+for i in range(0, cs_frame.shape[0]):
+    sexclass.append(cs_frame.iloc[i]["sex"] + str(cs_frame.iloc[i]["class"]))
+
+cs_frame = cs_frame.assign(sexclass = sexclass)
+
+# Note: try to pivot table by not selecting the sex column and by changing sur-
+# vived by an str version of itself.
+# First let's try to convert survived column to string, if this doesn't works,
+# let's try again with a new sexclass column with the form 1male0 for a male
+# of the class 1 that survived the crash.
+survived2 = list(map(lambda x : str(x), cs_frame["survived"].values))
+cs_frame = cs_frame.assign(survived2 = survived2)
+cs_frame[["counts", "survived2", "sexclass"]].pivot_table(index = "sexclass")
+
+# This didn't worked, let's continue with option two
+ssclass = []
+for i in range(0, cs_frame.shape[0]):
+    ssclass.append(str(cs_frame.iloc[i]["class"]) + cs_frame.iloc[i]["sex"] + str(cs_frame.iloc[i]["survived"]))
 
 
+cs_frame = cs_frame.assign(ssclass = ssclass)
+cs_frame[["ssclass", "counts"]].pivot_table(index = "ssclass").plot.barh(color = ["darkgreen", "green", "springgreen", "mediumspringgreen", "navy", "darkblue", "aquamarine", "turquoise", "brown", "firebrick", "coral", "orangered"])
+
+# Grouped plot example attempt.
+###############################################################################
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
+df = pd.DataFrame()
+df['Datetime'] = pd.date_range(start = '01/07/2018', end = '13/08/2021', freq = '15min')
+df['Quantity'] = np.random.rand(len(df))
+df['month'] = df['Datetime'].dt.month
+df['year'] = df['Datetime'].dt.year
+
+df = df.groupby(by = ['month', 'year'])['Quantity'].sum().reset_index()
 
 
+fig, ax = plt.subplots()
 
+sns.barplot(ax = ax, data = df, x = 'month', y = 'Quantity', hue = 'year')
 
+plt.show()
+###############################################################################
 
+class2 = list(map(lambda x : str(x), cs_frame["class"]))
+cs_frame = cs_frame.assign(class2 = class2)
 
+fig, ax = plt.subplots()
 
+sns.barplot(ax = ax, data = cs_frame, x = 'class2', y = 'counts', hue = 'sex')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plt.show()
 
 
 
