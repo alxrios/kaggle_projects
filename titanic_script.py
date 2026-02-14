@@ -498,6 +498,93 @@ sns.barplot(ax = ax, data = cs_frame, x = 'class2', y = 'counts', hue = 'sex')
 plt.show()
 
 
+# Column 6: Age
+
+train_ds["Age"].head()
+[train_ds["Age"].min(), train_ds["Age"].max()]
+sum(train_ds["Age"].isnull())
+train_ds["Age"].value_counts(dropna = False)
+# How many observations take a value less than 1?
+train_ds[train_ds["Age"] < 1]["Age"]
+
+# Plot histogram of the age, histogram of the age for the survivors and a 
+# histogram of the age for the passengers that not survived.
+
+plt.hist(train_ds["Age"], bins = 30, color = 'mediumseagreen', edgecolor = "darkgreen")
+plt.title("Passenger's age")
+plt.xlabel("age")
+plt.ylabel("Frequency")
+train_ds["Age"].median()
+train_ds["Age"].describe()
+print("min: ", train_ds["Age"].min(), 
+      "\n25th percentile: ", train_ds["Age"].quantile(0.25), 
+      "\nmedian: ", train_ds["Age"].median(), 
+      "\n75th percentile: ", train_ds["Age"].quantile(0.75), 
+      "\n90th percentile: ", train_ds["Age"].quantile(0.90),
+      "\n95th percentile: ", train_ds["Age"].quantile(0.95),
+      "\n99th percentile: ", train_ds["Age"].quantile(0.99),
+      "\nmax: ", train_ds["Age"].max())
+
+
+train_ds.hist("Age", by = "Survived")
+# Changing from 0, 1 to survived, not_survived
+plot_frame = train_ds[["Age", "Survived"]]
+plot_frame = plot_frame.assign(Survived2 = list(map(lambda x : "survived" if x == 1 else "not survived", train_ds["Survived"])))
+plot_frame.hist("Age", by = "Survived2", xrot = 0, color = "steelblue", edgecolor = "black")
+
+selection1 = train_ds["Survived"] == 1
+selection0 = train_ds["Survived"] == 0
+print("Not survived\n",
+      "min: ", train_ds[selection0]["Age"].min(), 
+      "\n25th percentile: ", train_ds[selection0]["Age"].quantile(0.25), 
+      "\nmedian: ", train_ds[selection0]["Age"].median(), 
+      "\n75th percentile: ", train_ds[selection0]["Age"].quantile(0.75), 
+      "\n90th percentile: ", train_ds[selection0]["Age"].quantile(0.90),
+      "\n95th percentile: ", train_ds[selection0]["Age"].quantile(0.95),
+      "\n99th percentile: ", train_ds[selection0]["Age"].quantile(0.99),
+      "\nmax: ", train_ds[selection0]["Age"].max())
+
+print("Survived\n",
+      "min: ", train_ds[selection1]["Age"].min(), 
+      "\n25th percentile: ", train_ds[selection1]["Age"].quantile(0.25), 
+      "\nmedian: ", train_ds[selection1]["Age"].median(), 
+      "\n75th percentile: ", train_ds[selection1]["Age"].quantile(0.75), 
+      "\n90th percentile: ", train_ds[selection1]["Age"].quantile(0.90),
+      "\n95th percentile: ", train_ds[selection1]["Age"].quantile(0.95),
+      "\n99th percentile: ", train_ds[selection1]["Age"].quantile(0.99),
+      "\nmax: ", train_ds[selection1]["Age"].max())
+
+
+train_ds.boxplot(by ='Survived', column =['Age'], grid = False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
