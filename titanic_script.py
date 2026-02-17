@@ -558,33 +558,75 @@ print("Survived\n",
 train_ds.boxplot(by ='Survived', column =['Age'], grid = False)
 
 
+# Column 7: SibSp
+
+train_ds["SibSp"].head()
+len(train_ds["SibSp"].unique())
+train_ds["SibSp"].unique()
+sum(train_ds["SibSp"].isnull())
+
+# The variable accounts for the number of siblings and/or spouses aboard the Titanic 	
+
+# How many passengers had no siblings or spouses onboard?
+# Did the passengers with one or more sibling or spouse onboard survived more than
+# the ones without them.
+
+sum(train_ds["SibSp"] == 0)
+train_ds.shape[0] - sum(train_ds["SibSp"] == 0)
+# 608 passengers with no siblings or spouses in the boat and 283 with them.
+#
+# Survived with no siblings/spouses vs. survived with them.
+sibsp_frame = train_ds[["SibSp", "Survived"]]
+sibsp_frame = sibsp_frame.assign(zerosiblings = list(map(lambda x : 1 if x == 0 else 0, sibsp_frame["SibSp"])))
+sibsp_frame[sibsp_frame["zerosiblings"] == 1]["Survived"].value_counts()
+# col1values = [0]*2
+# col1values.extend([1]*2)
+# plot_frame = pd.DataFrame({"zerosiblings" : col1values, "survived" : [0, 1]*2})
+# counts = list(sibsp_frame[sibsp_frame["zerosiblings"] == 1]["Survived"].value_counts().values)
+# counts.extend(list(sibsp_frame[sibsp_frame["zerosiblings"] == 0]["Survived"].value_counts().values))
+# plot_frame = plot_frame.assign(counts = counts)
+
+# # Let's change zerosiblings and survived to str
+# plot_frame = plot_frame.assign(zerosiblings2 = list(map(lambda x : str(x), plot_frame["zerosiblings"])))
+# plot_frame = plot_frame.assign(survived2 = list(map(lambda x : str(x), plot_frame["survived"])))
+
+# # Now let's create a new variable that sintetizes the information of zerosiblings2
+# # and survived2
+# zerosur = list(plot_frame["zerosiblings2"] + plot_frame["survived2"].values)
+# plot_frame = plot_frame.assign(zerosur = zerosur)
+# plot_frame[["zerosur", "counts"]].pivot_table(index = "zerosur").plot.barh()
 
 
+# plot_frame = pd.DataFrame({"zerosiblings" : [0, 1], "not_survived" : [398, 151], 
+#                            "survived" : []})
 
+survived = [sibsp_frame[sibsp_frame["zerosiblings"] == 1]["Survived"].value_counts()[1]]
+survived.extend([sibsp_frame[sibsp_frame["zerosiblings"] == 0]["Survived"].value_counts()[1]])
+not_survived = [sibsp_frame[sibsp_frame["zerosiblings"] == 1]["Survived"].value_counts()[0]]
+not_survived.extend([sibsp_frame[sibsp_frame["zerosiblings"] == 0]["Survived"].value_counts()[0]])
+plot_frame = pd.DataFrame({"SibSp" : ["Zero", "One or more"], 
+                           "not_survived" : not_survived, 
+                           "survived" : survived})
 
+plot_frame[["SibSp", "not_survived", "survived"]].pivot_table(index = "SibSp").plot.barh(color = ["darkslategray", "darkcyan"], title = "Survived, zero vs. one or more siblings/spouses in the boat.", xlabel = "counts")
 
+# Note: add the columns percentage_not and percentage_yes
+percentage_yes = [100*plot_frame.iloc[0][["not_survived", "survived"]][1]/sum(plot_frame.iloc[0][["not_survived", "survived"]])]
+percentage_yes.extend([100*plot_frame.iloc[1][["not_survived", "survived"]][1]/sum(plot_frame.iloc[1][["not_survived", "survived"]])])
+percentage_yes = list(map(lambda x : round(x, ndigits = 2), percentage_yes))
+# percentage_yes = np.round(np.array(list(percentage_yes)), 2)
+percentage_yes = list(map(lambda x : str(x) + "%", percentage_yes))
 
+percentage_not = [100*plot_frame.iloc[0][["not_survived", "survived"]][0]/sum(plot_frame.iloc[0][["not_survived", "survived"]])]
+percentage_not.extend([100*plot_frame.iloc[1][["not_survived", "survived"]][0]/sum(plot_frame.iloc[1][["not_survived", "survived"]])])
+percentage_not = list(map(lambda x : round(x, ndigits = 2), percentage_not))
+percentage_not = list(map(lambda x : str(x) + "%", percentage_not))
+plot_frame = plot_frame.assign(percentage_not = percentage_not)
+plot_frame = plot_frame.assign(percentage_yes = percentage_yes)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+round(100*(65.46-53.36)/53.36, 2)
+# The number of non survivors is a 22.68% higher among the passengers with zero
+# siblings or spouses on the boat.
 
 
 
