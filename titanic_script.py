@@ -628,6 +628,117 @@ round(100*(65.46-53.36)/53.36, 2)
 # The number of non survivors is a 22.68% higher among the passengers with zero
 # siblings or spouses on the boat.
 
+# Column 8: Parch
+
+train_ds["Parch"].head()
+len(train_ds["Parch"].unique())
+train_ds["Parch"].unique()
+sum(train_ds["Parch"].isnull())
+
+# The variable accounts for the number of parents and/or children of the 
+# passenger on the boat.
+# It take values from 0 to 6, and has no missing values.
+
+train_ds["Parch"].value_counts()
+# The majority of passengers have no children nor parents aboard the boat.
+
+# There were more survivors among the passengers with no parents and/or children
+# on the boat or there were more about the ones that have them?
+
+parch_frame = train_ds[["Survived", "Parch"]]
+parch_frame = parch_frame.assign(zeroparch = list(map(lambda x : 1 if x == 0 else 0, parch_frame["Parch"])))
+# Checking the new variable
+parch_frame[parch_frame["zeroparch"] == 1]["Parch"].value_counts()
+parch_frame[parch_frame["zeroparch"] == 0]["Parch"].value_counts()
+# Variable is ok.
+plot_frame = pd.DataFrame({"parch" : ["Zero", "One ore more"]})
+not_survived = [parch_frame[parch_frame["zeroparch"] == 1]["Survived"].value_counts()[0]]
+not_survived.extend([parch_frame[parch_frame["zeroparch"] == 0]["Survived"].value_counts()[0]])
+survived = [parch_frame[parch_frame["zeroparch"] == 1]["Survived"].value_counts()[1]]
+survived.extend([parch_frame[parch_frame["zeroparch"] == 0]["Survived"].value_counts()[1]])
+plot_frame = plot_frame.assign(not_survived = not_survived, survived = survived)
+percentage_not = [plot_frame.iloc[0]["not_survived"]/sum(plot_frame.iloc[0][["not_survived", "survived"]])]
+percentage_not.extend([plot_frame.iloc[1]["not_survived"]/sum(plot_frame.iloc[1][["not_survived", "survived"]])])
+percentage_yes = [plot_frame.iloc[0]["survived"]/sum(plot_frame.iloc[0][["not_survived", "survived"]])]
+percentage_yes.extend([plot_frame.iloc[1]["survived"]/sum(plot_frame.iloc[1][["not_survived", "survived"]])])
+percentage_not = list(map(lambda x : str(round(100*x, ndigits = 2)) + "%", percentage_not))
+percentage_yes = list(map(lambda x : str(round(100*x, ndigits = 2)) + "%", percentage_yes))
+plot_frame = plot_frame.assign(percentage_not = percentage_not, percentage_yes = percentage_yes)
+
+plot_frame[["parch", "not_survived", "survived"]].pivot_table(index = "parch").plot.barh(color = ["darkslategray", "darkcyan"], xlabel = "counts", title = "Survivors, zero parch vs. one or more.")
+
+round(100*(65.63 - 48.83)/48.83, 2)
+# Thte percentage of non survivors is a 34.41% highter among the passengers with
+# no parents nor children aboard the boat.
+
+# Now let's add a new variable to the train dataframe which takes the value
+# 0 if the observation take the value zero for teh parch variable and the
+# sibsp variable and 1 in any other case.
+
+family_df = train_ds[["Survived", "SibSp", "Parch"]]
+
+
+
+def compare(x, y):
+    if x == 0 and y == 0:
+        result = 0
+    else:
+        result = 1
+    return(result)
+
+
+test = train_ds[["SibSp", "Parch"]]
+test.apply(lambda x : compare(x.SibSp, x.Parch), axis = 1)
+test.assign(familyAboard = test.apply(lambda x : compare(x.SibSp, x.Parch), axis = 1))
+
+
+# Now let's add the new variable to the train_ds dataset
+train_ds = train_ds.assign(familyAboard = train_ds.apply(lambda x : compare(x.SibSp, x.Parch), axis = 1))
+
+train_ds[["familyAboard", "Survived"]].value_counts()
+selection0 = train_ds["familyAboard"] == 0
+selection1 = train_ds["familyAboard"] == 1
+counts0 = train_ds[selection0]["Survived"].value_counts()
+counts1 = train_ds[selection1]["Survived"].value_counts()
+
+survived = counts0
+plot_frame = pd.DataFrame({"familyAboard" : ["no", "yes"], "survived" : [counts0[1], counts1[1]], "not survived" : [counts0[0], counts1[0]]})
+plot_frame.pivot_table(index = "familyAboard").plot.barh(color = ["darkslategray", "darkcyan"], xlabel = "counts", title = "Survivors with/without faimily aboard the boat")
+
+percentage_yes = [round(100*plot_frame.iloc[0]["survived"]/sum(plot_frame.iloc[0][["survived", "not survived"]]), 2)]
+percentage_yes.extend([round(100*plot_frame.iloc[1]["survived"]/sum(plot_frame.iloc[1][["survived", "not survived"]]), 2)])
+percentage_not = [round(100*plot_frame.iloc[0]["not survived"]/sum(plot_frame.iloc[0][["survived", "not survived"]]), 2)]
+percentage_not.extend([round(100*plot_frame.iloc[1]["not survived"]/sum(plot_frame.iloc[1][["survived", "not survived"]]), 2)])
+
+percentage_yes = list(map(lambda x : str(x) + "%", percentage_yes))
+percentage_not = list(map(lambda x : str(x) + "%", percentage_not))
+
+plot_frame = plot_frame.assign(percentage_yes = percentage_yes)
+plot_frame = plot_frame.assign(percentage_not = percentage_not)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
