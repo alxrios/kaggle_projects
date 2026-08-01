@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Data load
-os.chdir("./documents/datasets/titanic")
+os.chdir("./Documentos/datasets/titanic")
 
 train_ds = pd.read_csv("train.csv")
 train_ds.shape
@@ -717,14 +717,41 @@ plot_frame = plot_frame.assign(percentage_yes = percentage_yes)
 plot_frame = plot_frame.assign(percentage_not = percentage_not)
 
 
+# Column 9: Ticket
+
+print(train_ds["Ticket"].head(10))
+print("Number of unique values: ", len(train_ds["Ticket"].unique()))
+print("Number of missing values: ", sum(train_ds["Ticket"].isnull()))
 
 
+counts = train_ds["Ticket"].value_counts()
+print(counts.head())
+print("Number of tickets which appear more than once: ", len(counts[counts > 1]))
+
+counts = train_ds["Ticket"].value_counts()
+print(counts[counts > 1].value_counts())
 
 
+# Column 10: Fare
+
+print(train_ds["Fare"].head())
+print("Number of unique values: ", len(train_ds["Fare"].unique()))
+print("Number of missing values: ", sum(train_ds["Fare"].isnull()))
+
+print({"min" : train_ds["Fare"].min(),
+       "25th percentile" : train_ds["Fare"].quantile(0.25),
+       "median" : train_ds["Fare"].quantile(0.5),
+       "75th percentile" : train_ds["Fare"].quantile(0.75),
+       "90th percentile" : train_ds["Fare"].quantile(0.90),
+       "95th percentile" : train_ds["Fare"].quantile(0.95),
+       "99th percentile" : train_ds["Fare"].quantile(0.99),
+       "max" : train_ds["Fare"].max()})
 
 
-
-
+plt.hist(train_ds["Fare"], bins = 15, color = 'tan', edgecolor = 'black')
+plt.xlabel('Fare')
+plt.ylabel('Frequency')
+plt.title("Ticket's fare histogram")
 
 
 
